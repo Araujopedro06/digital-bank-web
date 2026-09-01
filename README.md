@@ -79,7 +79,32 @@ npm start
 ```
 
 Then open <http://localhost:4200> and sign in with `pedro@demo.com` / `demo1234`
-(seeded by the API's dev profile).
+(seeded by the API's dev profile). The dev server proxies `/api` to the backend,
+so there is no CORS setup to do.
+
+## Testing on a phone over the local network
+
+The camera is the reason this needs care: browsers only expose `getUserMedia` in
+a **secure context**, and `http://192.168.x.x` is not one. Over plain HTTP the
+face screens will always fail on a phone, however well the rest works.
+
+```bash
+npm run start:lan
+```
+
+That serves over HTTPS on every interface (`ng serve --host 0.0.0.0 --ssl`) with
+a self-signed certificate. On the phone, open `https://<your-machine-ip>:4200`
+and accept the certificate warning once — after that it is a secure context and
+the camera works.
+
+The dev server also proxies `/api` to the backend on port 8080
+(`proxy.conf.json`), so the whole app is one origin. That matters twice over: no
+CORS, and no mixed-content block, which is what would happen if an HTTPS page
+called an HTTP API.
+
+If the phone cannot reach the machine at all, it is almost always the host
+firewall — the dev server needs an inbound allow rule for `node.exe` on the
+profile your Wi-Fi is using (Private or Public).
 
 ## Build
 
