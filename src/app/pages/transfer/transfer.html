@@ -17,30 +17,53 @@
     </p>
   }
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="field">
-      <label for="toAccountNumber">Conta de destino</label>
-      <input
-        id="toAccountNumber"
-        type="text"
-        inputmode="numeric"
-        formControlName="toAccountNumber"
-        placeholder="Ex.: 123456789"
-      />
-    </div>
+  @if (confirmingFace()) {
+    <h2 class="confirm-title">Confirme a transferência</h2>
+    <p class="muted confirm-sub">
+      {{ form.getRawValue().amount | currency: 'BRL' : 'symbol' : '1.2-2' }} para a conta
+      {{ form.getRawValue().toAccountNumber }}
+    </p>
+    <app-face-capture
+      mode="VERIFY"
+      (captured)="onFaceCaptured($event)"
+      (cancelled)="cancelFaceStep()"
+    />
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="toAccountNumber">Conta de destino</label>
+        <input
+          id="toAccountNumber"
+          type="text"
+          inputmode="numeric"
+          formControlName="toAccountNumber"
+          placeholder="Ex.: 123456789"
+        />
+      </div>
 
-    <div class="field">
-      <label for="amount">Valor (R$)</label>
-      <input id="amount" type="number" step="0.01" min="0.01" formControlName="amount" />
-    </div>
+      <div class="field">
+        <label for="amount">Valor (R$)</label>
+        <input id="amount" type="number" step="0.01" min="0.01" formControlName="amount" />
+      </div>
 
-    <div class="field">
-      <label for="description">Descrição (opcional)</label>
-      <input id="description" type="text" maxlength="120" formControlName="description" />
-    </div>
+      <div class="field">
+        <label for="description">Descrição (opcional)</label>
+        <input id="description" type="text" maxlength="120" formControlName="description" />
+      </div>
 
-    <button class="btn full" type="submit" [disabled]="form.invalid || submitting()">
-      {{ submitting() ? 'Enviando…' : 'Confirmar transferência' }}
-    </button>
-  </form>
+      <button class="btn full" type="submit" [disabled]="form.invalid || submitting()">
+        @if (submitting()) {
+          Enviando…
+        } @else if (faceRequired()) {
+          Continuar para verificação facial
+        } @else {
+          Confirmar transferência
+        }
+      </button>
+
+      @if (faceRequired()) {
+        <p class="muted face-note">Esta conta pede confirmação facial para transferir.</p>
+      }
+    </form>
+  }
 </div>

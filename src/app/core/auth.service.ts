@@ -3,7 +3,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AuthResponse } from './models';
+import { AuthResponse, LoginResponse } from './models';
+import { ProfileService } from './profile.service';
 
 const TOKEN_KEY = 'digital-bank.token';
 const NAME_KEY = 'digital-bank.name';
@@ -12,6 +13,7 @@ const NAME_KEY = 'digital-bank.name';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly profile = inject(ProfileService);
 
   private readonly token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
 
@@ -22,9 +24,26 @@ export class AuthService {
     return this.token();
   }
 
+  /**
+   * Password step. When the account has a face enrolled the response carries a
+   * challenge instead of a token, and nothing is stored until
+   * {@link completeFaceLogin} succeeds.
+   */
   login(email: string, password: string) {
     return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, { email, password })
+      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
+      .pipe(
+        tap((response) => {
+          if (!response.requiresFaceVerification) {
+            this.store(response);
+          }
+        }),
+      );
+  }
+
+  completeFaceLogin(challengeToken: string, descriptor: number[]) {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/login/face`, { challengeToken, descriptor })
       .pipe(tap((response) => this.store(response)));
   }
 
@@ -39,6 +58,8 @@ export class AuthService {
     localStorage.removeItem(NAME_KEY);
     this.token.set(null);
     this.userName.set(null);
+    // Drop the cached photo so the next user does not briefly see this one.
+    this.profile.clear();
     this.router.navigate(['/login']);
   }
 

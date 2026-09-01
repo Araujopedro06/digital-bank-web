@@ -8,7 +8,15 @@
       <a routerLink="/dashboard" routerLinkActive="active">Início</a>
       <a routerLink="/transfer" routerLinkActive="active">Transferir</a>
       <a routerLink="/statement" routerLinkActive="active">Extrato</a>
+      <a routerLink="/profile" routerLinkActive="active">Perfil</a>
     </nav>
+    <a class="avatar" routerLink="/profile" [attr.aria-label]="'Perfil de ' + auth.userName()">
+      @if (profile.photoUrl(); as url) {
+        <img [src]="url" alt="" />
+      } @else {
+        <span>{{ (auth.userName() || '?')[0] }}</span>
+      }
+    </a>
     <button type="button" class="btn btn-ghost sign-out" (click)="auth.logout()">Sair</button>
   </header>
 }

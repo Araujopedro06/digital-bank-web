@@ -1,0 +1,94 @@
+<h1>Perfil</h1>
+
+@if (notice()) {
+  <p class="notice">{{ notice() }}</p>
+}
+
+<section class="card">
+  <h2>Foto de perfil</h2>
+
+  <div class="photo-row">
+    <div class="avatar">
+      @if (profile.photoUrl(); as url) {
+        <img [src]="url" alt="Sua foto de perfil" />
+      } @else {
+        <span class="initials">{{ (auth.userName() || '?')[0] }}</span>
+      }
+    </div>
+
+    <div class="photo-actions">
+      <label class="btn" for="photo">Escolher foto</label>
+      <input id="photo" type="file" accept="image/jpeg,image/png" (change)="onPhotoSelected($event)" />
+
+      @if (profile.photoUrl()) {
+        <button type="button" class="btn btn-ghost" (click)="removePhoto()">Remover</button>
+      }
+      <p class="muted hint">JPEG ou PNG, até 2 MB.</p>
+    </div>
+  </div>
+
+  @if (photoError()) {
+    <p class="error">{{ photoError() }}</p>
+  }
+</section>
+
+<section class="card">
+  <h2>Verificação facial</h2>
+
+  @if (faceStatus(); as status) {
+    @if (status.enrolled && !enrolling()) {
+      <p class="status-ok">
+        Rosto cadastrado.
+        @if (status.consentedAt) {
+          <span class="muted">Consentimento em {{ status.consentedAt | date: 'dd/MM/yyyy' }}.</span>
+        }
+      </p>
+      <p class="muted">
+        Ele é pedido ao entrar na conta e para confirmar cada transferência.
+      </p>
+      <div class="face-actions">
+        <button type="button" class="btn btn-ghost" (click)="enrolling.set(true)">
+          Cadastrar novamente
+        </button>
+        <button type="button" class="btn btn-ghost danger" (click)="removeEnrollment()">
+          Apagar dados biométricos
+        </button>
+      </div>
+    } @else if (!enrolling()) {
+      <p class="muted">
+        Cadastre seu rosto para usá-lo como segundo fator no login e na confirmação de
+        transferências.
+      </p>
+      <button type="button" class="btn" (click)="enrolling.set(true)">Cadastrar meu rosto</button>
+    } @else {
+      <app-face-capture
+        mode="ENROLL"
+        (captured)="onFaceCaptured($event)"
+        (cancelled)="enrolling.set(false)"
+      />
+    }
+  } @else {
+    <p class="muted">Carregando…</p>
+  }
+
+  @if (faceError()) {
+    <p class="error">{{ faceError() }}</p>
+  }
+
+  <details class="privacy">
+    <summary>Como seus dados são tratados</summary>
+    <p>
+      A foto capturada pela câmera <strong>não é enviada nem armazenada</strong>. O navegador
+      converte o rosto em uma lista de 128 números e apenas ela é guardada, junto da data do seu
+      consentimento.
+    </p>
+    <p>
+      Dado biométrico é dado pessoal sensível (LGPD, art. 5º, II). Você pode apagá-lo a qualquer
+      momento no botão acima, e a conta volta a funcionar só com senha.
+    </p>
+    <p>
+      A prova de vida deste projeto é uma demonstração acadêmica: ela dificulta o uso de uma foto
+      parada, mas não substitui uma solução antifraude de mercado.
+    </p>
+  </details>
+</section>

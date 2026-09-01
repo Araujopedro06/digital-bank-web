@@ -22,11 +22,35 @@ The Spring Boot API it talks to lives in
 
 ```
 src/app
-├── core       auth service, HTTP interceptor, route guards, API client, models
-├── pages      login, register, dashboard, transfer, statement (lazy-loaded)
-├── app.ts     shell: navigation, responsive chrome
+├── core       auth, HTTP interceptor, guards, API clients, face + profile services
+├── pages      login, register, dashboard, transfer, statement, profile (lazy-loaded)
+├── shared     face-capture: webcam, liveness challenge, descriptor extraction
+├── app.ts     shell: navigation, avatar, responsive chrome
 └── app.routes route table with auth/guest guards
 ```
+
+## Profile photo and facial verification
+
+The profile page takes a JPEG/PNG avatar (2 MB cap, checked here and again by
+magic bytes on the server) and manages the face enrolment.
+
+Face capture runs entirely in the browser with
+[@vladmandic/face-api](https://github.com/vladmandic/face-api). The camera frame
+is never uploaded: the page detects the face, asks for a random liveness
+challenge (blink, turn left, turn right) computed from the 68 landmarks, then
+extracts a 128-number descriptor and sends only that. The server does the
+matching.
+
+Once enrolled, the face is required to finish a login and to confirm each
+transfer, in both cases via a single-use token from the API.
+
+The library and its ~6.7 MB of weights are lazy-loaded on first use, so the
+initial bundle stays around 90 kB transferred; face-api lands in its own 268 kB
+chunk fetched only when a face screen opens.
+
+**This is demo-grade liveness.** The challenge raises the bar past a still
+photo, but it is not anti-spoofing — the UI says so, and the README of the API
+covers the LGPD handling.
 
 ## Running it
 

@@ -1,0 +1,70 @@
+.capture {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.stage {
+  align-items: center;
+  aspect-ratio: 4 / 3;
+  background: var(--surface-raised);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+
+  &.active {
+    border-color: var(--accent);
+  }
+}
+
+video {
+  display: none;
+  height: 100%;
+  object-fit: cover;
+  /* Mirrored so moving right on screen matches moving right in the room. */
+  transform: scaleX(-1);
+  width: 100%;
+
+  &.visible {
+    display: block;
+  }
+}
+
+.placeholder {
+  margin: 0;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.challenge {
+  background: var(--surface-raised);
+  border-radius: 10px;
+  font-weight: 600;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  text-align: center;
+
+  &.ok {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+
+  .btn {
+    flex: 1;
+  }
+}
+
+.disclaimer {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  margin: 0;
+}

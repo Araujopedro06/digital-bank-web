@@ -10,6 +10,20 @@
   width: 100%;
 }
 
+.confirm-title {
+  font-size: 1.05rem;
+}
+
+.confirm-sub {
+  margin: 0.35rem 0 1.25rem;
+}
+
+.face-note {
+  font-size: 0.82rem;
+  margin: 0.9rem 0 0;
+  text-align: center;
+}
+
 .success {
   background: var(--accent-soft);
   border-radius: 10px;

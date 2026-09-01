@@ -1,0 +1,53 @@
+<div class="capture">
+  <div class="stage" [class.active]="phase() === 'CHALLENGE' || phase() === 'CAPTURING'">
+    <video #video playsinline muted [class.visible]="phase() !== 'IDLE'"></video>
+
+    @switch (phase()) {
+      @case ('IDLE') {
+        <p class="placeholder muted">
+          {{
+            mode() === 'ENROLL'
+              ? 'Cadastre seu rosto para usar como segundo fator.'
+              : 'Confirme que é você para continuar.'
+          }}
+        </p>
+      }
+      @case ('LOADING_MODELS') {
+        <p class="placeholder muted">Carregando o modelo de reconhecimento…</p>
+      }
+      @case ('STARTING_CAMERA') {
+        <p class="placeholder muted">Abrindo a câmera…</p>
+      }
+    }
+  </div>
+
+  @if (phase() === 'CHALLENGE') {
+    <p class="challenge" [class.ok]="faceDetected()">
+      {{ faceDetected() ? challengeLabel() : 'Posicione o rosto no centro' }}
+    </p>
+  }
+
+  @if (phase() === 'CAPTURING') {
+    <p class="challenge ok">Prova de vida concluída. Olhe para a câmera…</p>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <div class="actions">
+    @if (phase() === 'IDLE') {
+      <button type="button" class="btn" (click)="start()" [disabled]="busy()">
+        {{ mode() === 'ENROLL' ? 'Cadastrar meu rosto' : 'Verificar meu rosto' }}
+      </button>
+      <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+    } @else if (phase() !== 'DONE') {
+      <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+    }
+  </div>
+
+  <p class="disclaimer muted">
+    A imagem não sai do seu dispositivo — apenas uma representação matemática do rosto é enviada.
+    A prova de vida aqui é uma demonstração e não substitui uma solução antifraude de mercado.
+  </p>
+</div>

@@ -1,0 +1,125 @@
+.card {
+  margin-top: 1.5rem;
+  max-width: 520px;
+
+  h2 {
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.notice {
+  background: var(--accent-soft);
+  border-radius: 10px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  margin: 1rem 0 0;
+  padding: 0.7rem 0.85rem;
+}
+
+.photo-row {
+  align-items: center;
+  display: flex;
+  gap: 1.25rem;
+}
+
+.avatar {
+  align-items: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  flex: none;
+  height: 92px;
+  justify-content: center;
+  overflow: hidden;
+  width: 92px;
+
+  img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+}
+
+.initials {
+  color: var(--text-muted);
+  font-size: 2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  input[type='file'] {
+    display: none;
+  }
+
+  label.btn {
+    cursor: pointer;
+    display: inline-block;
+  }
+}
+
+.hint {
+  flex-basis: 100%;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.status-ok {
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+
+  .muted {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 400;
+    margin-top: 0.2rem;
+  }
+}
+
+.face-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.9rem;
+  }
+
+  .danger {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+}
+
+.privacy {
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+
+  summary {
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  p {
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+}
+
+@media (max-width: 720px) {
+  .photo-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

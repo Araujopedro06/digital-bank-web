@@ -38,3 +38,19 @@ export interface ApiError {
   message: string;
   fieldErrors?: Record<string, string>;
 }
+
+export interface FaceStatus {
+  enrolled: boolean;
+  consentedAt: string | null;
+}
+
+export interface StepUpToken {
+  verificationToken: string;
+  expiresIn: number;
+}
+
+/** A login that stopped at the password step because a face is enrolled. */
+export interface LoginResponse extends AuthResponse {
+  requiresFaceVerification: boolean;
+  challengeToken: string | null;
+}
