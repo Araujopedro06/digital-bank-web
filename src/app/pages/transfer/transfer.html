@@ -1,0 +1,46 @@
+<h1>Transferir</h1>
+
+@if (account(); as acc) {
+  <p class="muted balance">
+    Saldo disponível: {{ acc.balance | currency: 'BRL' : 'symbol' : '1.2-2' }}
+  </p>
+}
+
+<div class="card form-card">
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+  @if (success(); as sent) {
+    <p class="success">
+      Transferência de {{ sent.amount | currency: 'BRL' : 'symbol' : '1.2-2' }} enviada para a conta
+      {{ sent.account }}.
+    </p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="toAccountNumber">Conta de destino</label>
+      <input
+        id="toAccountNumber"
+        type="text"
+        inputmode="numeric"
+        formControlName="toAccountNumber"
+        placeholder="Ex.: 123456789"
+      />
+    </div>
+
+    <div class="field">
+      <label for="amount">Valor (R$)</label>
+      <input id="amount" type="number" step="0.01" min="0.01" formControlName="amount" />
+    </div>
+
+    <div class="field">
+      <label for="description">Descrição (opcional)</label>
+      <input id="description" type="text" maxlength="120" formControlName="description" />
+    </div>
+
+    <button class="btn full" type="submit" [disabled]="form.invalid || submitting()">
+      {{ submitting() ? 'Enviando…' : 'Confirmar transferência' }}
+    </button>
+  </form>
+</div>

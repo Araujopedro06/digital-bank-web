@@ -1,0 +1,51 @@
+@if (loading()) {
+  <p class="muted">Carregando…</p>
+} @else if (account(); as acc) {
+  <section class="balance-card">
+    <div class="row">
+      <span class="muted">Olá, {{ auth.userName() }}</span>
+      <button type="button" class="eye" (click)="toggleBalance()">
+        {{ balanceHidden() ? 'Mostrar' : 'Ocultar' }}
+      </button>
+    </div>
+
+    <p class="label muted">Saldo disponível</p>
+    <p class="amount">
+      {{ balanceHidden() ? '••••••' : (acc.balance | currency: 'BRL' : 'symbol' : '1.2-2') }}
+    </p>
+    <p class="muted account-number">Conta {{ acc.number }}</p>
+
+    <div class="actions">
+      <a class="btn" routerLink="/transfer">Transferir</a>
+      <a class="btn btn-ghost" routerLink="/statement">Ver extrato</a>
+    </div>
+  </section>
+
+  <section class="recent">
+    <div class="row">
+      <h2>Últimas movimentações</h2>
+      <a routerLink="/statement">Ver todas</a>
+    </div>
+
+    @if (recent().length === 0) {
+      <p class="muted">Nenhuma movimentação ainda.</p>
+    } @else {
+      <ul class="list">
+        @for (item of recent(); track item.id) {
+          <li>
+            <div>
+              <p class="description">{{ item.description }}</p>
+              <p class="muted meta">{{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+            <span class="value" [class.credit]="isCredit(item)">
+              {{ isCredit(item) ? '+' : '−' }}
+              {{ item.amount | currency: 'BRL' : 'symbol' : '1.2-2' }}
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+} @else {
+  <p class="error">Não foi possível carregar sua conta.</p>
+}

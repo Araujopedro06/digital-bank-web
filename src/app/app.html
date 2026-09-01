@@ -1,0 +1,18 @@
+@if (auth.isLoggedIn()) {
+  <header class="topbar">
+    <a class="brand" routerLink="/dashboard">
+      <span class="dot"></span>
+      Digital Bank
+    </a>
+    <nav class="links">
+      <a routerLink="/dashboard" routerLinkActive="active">Início</a>
+      <a routerLink="/transfer" routerLinkActive="active">Transferir</a>
+      <a routerLink="/statement" routerLinkActive="active">Extrato</a>
+    </nav>
+    <button type="button" class="btn btn-ghost sign-out" (click)="auth.logout()">Sair</button>
+  </header>
+}
+
+<main class="shell">
+  <router-outlet />
+</main>

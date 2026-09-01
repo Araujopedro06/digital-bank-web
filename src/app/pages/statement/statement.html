@@ -1,0 +1,48 @@
+<h1>Extrato</h1>
+
+@if (loading()) {
+  <p class="muted">Carregando…</p>
+} @else if (transactions().length === 0) {
+  <p class="muted">Nenhuma movimentação por aqui ainda.</p>
+} @else {
+  <ul class="list">
+    @for (item of transactions(); track item.id) {
+      <li>
+        <div class="info">
+          <p class="description">{{ item.description }}</p>
+          <p class="muted meta">
+            {{ label(item.type) }}
+            @if (item.counterpartyNumber) {
+              · conta {{ item.counterpartyNumber }}
+            }
+            · {{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+          </p>
+        </div>
+        <div class="values">
+          <span class="value" [class.credit]="isCredit(item)">
+            {{ isCredit(item) ? '+' : '−' }}
+            {{ item.amount | currency: 'BRL' : 'symbol' : '1.2-2' }}
+          </span>
+          <span class="muted after">
+            saldo {{ item.balanceAfter | currency: 'BRL' : 'symbol' : '1.2-2' }}
+          </span>
+        </div>
+      </li>
+    }
+  </ul>
+
+  <div class="pager">
+    <button
+      type="button"
+      class="btn btn-ghost"
+      [disabled]="!hasPrevious()"
+      (click)="load(page() - 1)"
+    >
+      Anterior
+    </button>
+    <span class="muted">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+    <button type="button" class="btn btn-ghost" [disabled]="!hasNext()" (click)="load(page() + 1)">
+      Próxima
+    </button>
+  </div>
+}
