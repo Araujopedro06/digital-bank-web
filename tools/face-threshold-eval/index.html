@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Calibração do limiar facial — Digital Bank</title>
+    <style>
+      body {
+        background: #0e1116;
+        color: #e8ecf1;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.55;
+        margin: 0 auto;
+        max-width: 820px;
+        padding: 2rem 1.25rem 4rem;
+      }
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.05rem; margin-top: 2rem; }
+      p, li { color: #9aa4b2; }
+      button {
+        background: #22c55e; border: 0; border-radius: 8px; color: #05140a;
+        cursor: pointer; font-size: 1rem; font-weight: 600; padding: 0.7rem 1.2rem;
+      }
+      button:disabled { cursor: not-allowed; opacity: 0.5; }
+      table { border-collapse: collapse; margin-top: 0.75rem; width: 100%; }
+      th, td { border-bottom: 1px solid #2a313c; padding: 0.5rem 0.6rem; text-align: left; }
+      th { color: #e8ecf1; font-size: 0.85rem; }
+      td { color: #9aa4b2; font-variant-numeric: tabular-nums; }
+      .ok { color: #22c55e; }
+      .warn { color: #f87171; }
+      #status { margin-top: 1rem; }
+      code { background: #1e242d; border-radius: 4px; padding: 0.1rem 0.35rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Calibração do limiar de reconhecimento facial</h1>
+
+    <p>
+      Mede, com rostos reais, a distância entre descritores de
+      <strong>pessoas diferentes</strong> e da <strong>mesma pessoa recapturada</strong>, para
+      escolher o valor de <code>app.face.match-threshold</code> com base em dado e não em chute.
+    </p>
+
+    <p>
+      Verdade de campo sem rotulagem manual: dois rostos <em>na mesma foto</em> são
+      necessariamente pessoas diferentes. Para a mesma pessoa, cada foto é redesenhada com
+      variações de câmera (escala, brilho, desfoque, inclinação, compressão) e os descritores são
+      extraídos de novo.
+    </p>
+
+    <button id="run">Rodar avaliação</button>
+    <div id="status"></div>
+    <div id="out"></div>
+
+    <script type="module">
+      const FACE_API = '../../node_modules/@vladmandic/face-api/dist/face-api.esm.js';
+      const SAMPLES = '../../node_modules/@vladmandic/face-api/demo';
+      const MODELS = '../../public/models';
+      const THRESHOLDS = [0.4, 0.45, 0.5, 0.55, 0.6];
+
+      const status = document.getElementById('status');
+      const out = document.getElementById('out');
+      const say = (m) => (status.textContent = m);
+
+      const load = (src) =>
+        new Promise((res, rej) => {
+          const i = new Image();
+          i.onload = () => res(i);
+          i.onerror = () => rej(new Error('não carregou ' + src));
+          i.src = src;
+        });
+
+      const variant = (img, { scale = 1, bright = 1, blur = 0, rotate = 0, quality = 0.92 }) => {
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * scale);
+        c.height = Math.round(img.naturalHeight * scale);
+        const x = c.getContext('2d');
+        x.filter = `brightness(${bright}) blur(${blur}px)`;
+        x.translate(c.width / 2, c.height / 2);
+        x.rotate((rotate * Math.PI) / 180);
+        x.drawImage(img, -c.width / 2, -c.height / 2, c.width, c.height);
+        return new Promise((res) =>
+          c.toBlob(async (b) => res(await load(URL.createObjectURL(b))), 'image/jpeg', quality),
+        );
+      };
+
+      const stats = (v) => {
+        const s = [...v].sort((a, b) => a - b);
+        return {
+          n: s.length,
+          min: s[0],
+          max: s[s.length - 1],
+          media: s.reduce((a, b) => a + b, 0) / s.length,
+          p95: s[Math.floor(s.length * 0.95)] ?? s[s.length - 1],
+        };
+      };
+      const f = (n) => n.toFixed(3);
+
+      document.getElementById('run').addEventListener('click', async (e) => {
+        e.target.disabled = true;
+        try {
+          say('Carregando face-api e os modelos…');
+          const fa = await import(FACE_API);
+          await Promise.all([
+            fa.nets.tinyFaceDetector.loadFromUri(MODELS),
+            fa.nets.faceLandmark68Net.loadFromUri(MODELS),
+            fa.nets.faceRecognitionNet.loadFromUri(MODELS),
+          ]);
+          const opts = new fa.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.4 });
+
+          say('Extraindo descritores das fotos originais…');
+          const byPhoto = {};
+          for (let n = 1; n <= 6; n++) {
+            const img = await load(`${SAMPLES}/sample${n}.jpg`);
+            const faces = await fa.detectAllFaces(img, opts).withFaceLandmarks().withFaceDescriptors();
+            if (faces.length) byPhoto['s' + n] = faces.map((x) => x.descriptor);
+          }
+
+          const all = [];
+          for (const [photo, list] of Object.entries(byPhoto))
+            list.forEach((d, i) => all.push({ photo, id: `${photo}.${i}`, d }));
+
+          const different = [];
+          for (let a = 0; a < all.length; a++)
+            for (let b = a + 1; b < all.length; b++)
+              different.push(fa.euclideanDistance(all[a].d, all[b].d));
+
+          say('Recapturando os mesmos rostos com variações de câmera…');
+          const variations = [
+            ['escala 70%', { scale: 0.7 }],
+            ['mais claro', { bright: 1.25 }],
+            ['mais escuro', { bright: 0.75 }],
+            ['leve desfoque', { blur: 1.5 }],
+            ['inclinado 7°', { rotate: 7 }],
+            ['jpeg 40%', { quality: 0.4 }],
+          ];
+          const same = [];
+          const perVariation = [];
+          for (const [label, cfg] of variations) {
+            const ds = [];
+            for (const photo of Object.keys(byPhoto)) {
+              const img = await load(`${SAMPLES}/sample${photo.slice(1)}.jpg`);
+              const faces = await fa
+                .detectAllFaces(await variant(img, cfg), opts)
+                .withFaceLandmarks()
+                .withFaceDescriptors();
+              for (const face of faces) {
+                let best = Infinity;
+                for (const original of byPhoto[photo])
+                  best = Math.min(best, fa.euclideanDistance(original, face.descriptor));
+                if (best < 1.2) ds.push(best);
+              }
+            }
+            ds.forEach((d) => same.push(d));
+            perVariation.push([label, stats(ds)]);
+          }
+
+          const sd = stats(different);
+          const ss = stats(same);
+          const rows = THRESHOLDS.map((t) => {
+            const falseAccept = different.filter((d) => d <= t).length;
+            const falseReject = same.filter((d) => d > t).length;
+            return `<tr>
+              <td><strong>${t}</strong>${t === 0.6 ? ' (padrão da lib)' : ''}</td>
+              <td class="${falseAccept ? 'warn' : 'ok'}">${falseAccept} / ${different.length}</td>
+              <td class="${falseReject ? 'warn' : 'ok'}">${falseReject} / ${same.length}</td>
+            </tr>`;
+          }).join('');
+
+          out.innerHTML = `
+            <h2>Distâncias medidas</h2>
+            <table>
+              <tr><th>Conjunto</th><th>n</th><th>mín</th><th>média</th><th>p95</th><th>máx</th></tr>
+              <tr><td>Pessoas diferentes</td><td>${sd.n}</td><td>${f(sd.min)}</td><td>${f(sd.media)}</td><td>${f(sd.p95)}</td><td>${f(sd.max)}</td></tr>
+              <tr><td>Mesma pessoa, recaptura</td><td>${ss.n}</td><td>${f(ss.min)}</td><td>${f(ss.media)}</td><td>${f(ss.p95)}</td><td>${f(ss.max)}</td></tr>
+            </table>
+            <p>Faixa de separação: <strong>${f(ss.max)} → ${f(sd.min)}</strong>. O limiar precisa cair aqui dentro.</p>
+
+            <h2>Erros por limiar</h2>
+            <table>
+              <tr><th>Limiar</th><th>Falsa aceitação (grave)</th><th>Falsa rejeição (só irrita)</th></tr>
+              ${rows}
+            </table>
+
+            <h2>Mesma pessoa, por tipo de variação</h2>
+            <table>
+              <tr><th>Variação</th><th>n</th><th>média</th><th>máx</th></tr>
+              ${perVariation.map(([l, s]) => `<tr><td>${l}</td><td>${s.n}</td><td>${f(s.media)}</td><td>${f(s.max)}</td></tr>`).join('')}
+            </table>
+
+            <h2>Como ler isto</h2>
+            <p>
+              A recaptura aqui é a mesma foto redesenhada, então subestima a variação real: capturas
+              de dias, poses e expressões diferentes ficam mais distantes. Trate a coluna da mesma
+              pessoa como piso otimista e mantenha folga sobre o mínimo das pessoas diferentes.
+            </p>
+            <p>
+              A amostra tem ${all.length} rostos — suficiente para descartar um limiar ruim, longe do
+              necessário para afirmar taxa de erro. Um sistema real calibra com milhares de pares e
+              acompanha o desempenho por grupo demográfico.
+            </p>`;
+          say('Concluído.');
+        } catch (err) {
+          say('Falhou: ' + err.message);
+        } finally {
+          e.target.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -50,7 +50,24 @@ chunk fetched only when a face screen opens.
 
 **This is demo-grade liveness.** The challenge raises the bar past a still
 photo, but it is not anti-spoofing — the UI says so, and the README of the API
-covers the LGPD handling.
+covers both the LGPD handling and why a browser-computed descriptor cannot be a
+true second factor.
+
+### Threshold calibration
+
+`tools/face-threshold-eval/index.html` measures, on real faces, how far apart
+descriptors of different people are versus the same face recaptured, and prints
+the false accept/reject count per threshold. It is what set the API's 0.45.
+
+Serve the repo root over HTTP and open the page — `file://` will not work,
+because it loads ES modules and the model weights:
+
+```bash
+npx http-server . -p 8099 -o /tools/face-threshold-eval/
+```
+
+It reads the sample photos straight out of `node_modules`, so `npm install` is
+the only setup.
 
 ## Running it
 
