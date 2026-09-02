@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { runtimeConfig } from './runtime-config';
 import { AuthResponse, LoginResponse } from './models';
 import { ProfileService } from './profile.service';
 
@@ -31,7 +31,7 @@ export class AuthService {
    */
   login(email: string, password: string) {
     return this.http
-      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
+      .post<LoginResponse>(`${runtimeConfig.apiUrl}/auth/login`, { email, password })
       .pipe(
         tap((response) => {
           if (!response.requiresFaceVerification) {
@@ -43,13 +43,13 @@ export class AuthService {
 
   completeFaceLogin(challengeToken: string, descriptor: number[]) {
     return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/login/face`, { challengeToken, descriptor })
+      .post<AuthResponse>(`${runtimeConfig.apiUrl}/auth/login/face`, { challengeToken, descriptor })
       .pipe(tap((response) => this.store(response)));
   }
 
   register(name: string, email: string, password: string) {
     return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, { name, email, password })
+      .post<AuthResponse>(`${runtimeConfig.apiUrl}/auth/register`, { name, email, password })
       .pipe(tap((response) => this.store(response)));
   }
 

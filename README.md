@@ -112,8 +112,8 @@ profile your Wi-Fi is using (Private or Public).
 npm run build
 ```
 
-`ng build` swaps `environment.ts` for `environment.production.ts`, which points
-the client at a same-origin `/api` instead of `localhost:8080`.
+Output lands in `dist/digital-bank-web/browser`. The API address is not compiled
+in — see **Deploying** below — so the same artifact runs against any backend.
 
 ## Notes on the design
 
@@ -126,3 +126,27 @@ the client at a same-origin `/api` instead of `localhost:8080`.
   Portuguese.
 - **Feature routes are lazy-loaded,** keeping the initial bundle around 88 kB
   transferred.
+
+## Deploying
+
+Static hosting plus a rewrite. `netlify.toml` sets the three things any host
+needs — build `npm run build`, publish `dist/digital-bank-web/browser`, and send
+unmatched paths to `index.html` so deep links reach the router. Vercel and
+Cloudflare Pages take the same settings through their own UI. A `Dockerfile` and
+`nginx.conf` are here too, if the front end goes out as a container.
+
+### Pointing at the API
+
+The API address is read from `config.json` **when the page loads**, not baked in
+at build time:
+
+```json
+{ "apiUrl": "https://digital-bank-api.onrender.com/api" }
+```
+
+One build therefore runs anywhere, and repointing it is editing a file rather
+than rebuilding. Set the API's `CORS_ORIGINS` to this site's exact origin, or the
+browser is refused before the request arrives.
+
+Both sides must be HTTPS: the camera needs a secure context, and an HTTPS page
+calling an HTTP API is blocked as mixed content.

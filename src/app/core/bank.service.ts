@@ -1,12 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { runtimeConfig } from './runtime-config';
 import { Account, Page, Transaction } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class BankService {
   private readonly http = inject(HttpClient);
-  private readonly base = environment.apiUrl;
+  private readonly base = runtimeConfig.apiUrl;
 
   myAccount() {
     return this.http.get<Account>(`${this.base}/accounts/me`);

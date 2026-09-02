@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { runtimeConfig } from './runtime-config';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -30,11 +30,11 @@ export class ProfileService {
   upload(file: File) {
     const form = new FormData();
     form.append('file', file);
-    return this.http.post<void>(`${environment.apiUrl}/profile/photo`, form);
+    return this.http.post<void>(`${runtimeConfig.apiUrl}/profile/photo`, form);
   }
 
   delete() {
-    return this.http.delete<void>(`${environment.apiUrl}/profile/photo`);
+    return this.http.delete<void>(`${runtimeConfig.apiUrl}/profile/photo`);
   }
 
   clear() {
@@ -45,7 +45,7 @@ export class ProfileService {
     let next: string | null = null;
     try {
       const blob = await firstValueFrom(
-        this.http.get(`${environment.apiUrl}/profile/photo`, { responseType: 'blob' }),
+        this.http.get(`${runtimeConfig.apiUrl}/profile/photo`, { responseType: 'blob' }),
       );
       next = blob && blob.size > 0 ? URL.createObjectURL(blob) : null;
     } catch {

@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { runtimeConfig } from './runtime-config';
 import { FaceStatus, StepUpToken } from './models';
 
 /** The face-api.js namespace, loaded on demand. */
 type FaceApi = typeof import('@vladmandic/face-api');
 
-const MODEL_URL = '/models';
+/** Base-relative, so the weights still resolve when served under a sub-path. */
+const MODEL_URL = new URL('models', document.baseURI).href;
 
 @Injectable({ providedIn: 'root' })
 export class FaceService {
@@ -54,22 +55,22 @@ export class FaceService {
   // --- API calls -----------------------------------------------------------
 
   status() {
-    return this.http.get<FaceStatus>(`${environment.apiUrl}/face/enrollment`);
+    return this.http.get<FaceStatus>(`${runtimeConfig.apiUrl}/face/enrollment`);
   }
 
   enroll(descriptor: number[]) {
-    return this.http.put<FaceStatus>(`${environment.apiUrl}/face/enrollment`, {
+    return this.http.put<FaceStatus>(`${runtimeConfig.apiUrl}/face/enrollment`, {
       descriptor,
       consent: true,
     });
   }
 
   deleteEnrollment() {
-    return this.http.delete<void>(`${environment.apiUrl}/face/enrollment`);
+    return this.http.delete<void>(`${runtimeConfig.apiUrl}/face/enrollment`);
   }
 
   /** Exchanges a matching face for a single-use token that authorises one transfer. */
   verify(descriptor: number[]) {
-    return this.http.post<StepUpToken>(`${environment.apiUrl}/face/verify`, { descriptor });
+    return this.http.post<StepUpToken>(`${runtimeConfig.apiUrl}/face/verify`, { descriptor });
   }
 }

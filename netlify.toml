@@ -1,0 +1,28 @@
+# Netlify deploy. Vercel and Cloudflare Pages need the same three settings:
+# build "npm run build", publish "dist/digital-bank-web/browser", and an SPA
+# rewrite so deep links reach index.html.
+#
+# Point the app at the API by editing public/config.json before deploying, or by
+# overriding /config.json on the host.
+
+[build]
+  command = "npm run build"
+  publish = "dist/digital-bank-web/browser"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/config.json"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/models/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"

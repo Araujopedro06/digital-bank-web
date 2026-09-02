@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # The face weights ship as static assets; a build that dropped them would
+      # fail only at runtime, on the one screen that matters most.
+      - name: Check the face models made it into the bundle
+        run: |
+          for model in tiny_face_detector_model face_landmark_68_model face_recognition_model; do
+            test -f "dist/digital-bank-web/browser/models/$model.bin" \
+              || { echo "missing $model.bin"; exit 1; }
+          done
+          echo "all three model files present"
