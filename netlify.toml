@@ -2,11 +2,12 @@
 # build "npm run build", publish "dist/digital-bank-web/browser", and an SPA
 # rewrite so deep links reach index.html.
 #
-# Point the app at the API by editing public/config.json before deploying, or by
-# overriding /config.json on the host.
+# Set API_URL in the host's environment variables to the deployed API, including
+# the /api suffix. The build writes it into config.json; without it the site
+# calls /api on its own origin, which is right for local use and wrong here.
 
 [build]
-  command = "npm run build"
+  command = "npm run build && node scripts/write-config.mjs"
   publish = "dist/digital-bank-web/browser"
 
 [build.environment]

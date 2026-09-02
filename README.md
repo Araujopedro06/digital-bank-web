@@ -137,16 +137,22 @@ Cloudflare Pages take the same settings through their own UI. A `Dockerfile` and
 
 ### Pointing at the API
 
-The API address is read from `config.json` **when the page loads**, not baked in
-at build time:
+The API address is read from `config.json` **when the page loads**, not compiled
+into the bundle. Set `API_URL` in the host's environment variables, including the
+`/api` suffix:
 
-```json
-{ "apiUrl": "https://digital-bank-api.onrender.com/api" }
+```
+API_URL = https://digital-bank-api-701x.onrender.com/api
 ```
 
-One build therefore runs anywhere, and repointing it is editing a file rather
-than rebuilding. Set the API's `CORS_ORIGINS` to this site's exact origin, or the
-browser is refused before the request arrives.
+The build writes that into `config.json` (`scripts/write-config.mjs`). The copy
+committed under `public/` stays at `/api`, which is what the dev server proxies,
+so local development and phone testing are unaffected by whatever the deployed
+site points at.
+
+Then set the API's `CORS_ORIGINS` to this site's exact origin. Without it the
+browser is refused with a bare 403 before the request reaches a controller, while
+curl — which sends no `Origin` — reports everything healthy.
 
 Both sides must be HTTPS: the camera needs a secure context, and an HTTPS page
 calling an HTTP API is blocked as mixed content.
