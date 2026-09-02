@@ -4,8 +4,13 @@ Angular 20 client for the Digital Bank API: sign-in, balance, transfers and
 statement. One responsive codebase — a sidebar-style top bar on desktop that
 becomes a bottom tab bar on phones, the way a real banking app behaves.
 
+**Live: <https://tiny-druid-25e148.netlify.app>** — sign in with
+`pedro@demo.com` / `demo1234`, or open an account of your own.
+
 The Spring Boot API it talks to lives in
-[digital-bank-api](https://github.com/Araujopedro06/digital-bank-api).
+[digital-bank-api](https://github.com/Araujopedro06/digital-bank-api) and is
+deployed at <https://digital-bank-api-701x.onrender.com>. It sleeps when idle on
+the free tier, so the first request after a quiet spell can take ~50 seconds.
 
 ## Stack
 
