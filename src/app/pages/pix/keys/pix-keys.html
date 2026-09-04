@@ -1,0 +1,73 @@
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<div class="columns">
+  <section class="card">
+    <h2>Suas chaves</h2>
+
+    @if (loading()) {
+      <p class="muted">Carregando…</p>
+    } @else if (keys().length === 0) {
+      <p class="muted empty">
+        Você ainda não tem chaves. Cadastre uma para receber sem passar o número da conta.
+      </p>
+    } @else {
+      <ul class="list">
+        @for (key of keys(); track key.id) {
+          <li>
+            <div class="info">
+              <p class="type muted">{{ labels[key.type] }}</p>
+              <p class="value">{{ key.display }}</p>
+            </div>
+            <div class="row-actions">
+              <button type="button" class="btn btn-ghost small" (click)="copy(key)">
+                {{ copied() === key.id ? 'Copiada' : 'Copiar' }}
+              </button>
+              <button type="button" class="btn btn-ghost small danger" (click)="remove(key)">
+                Excluir
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="card">
+    <h2>Cadastrar chave</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="type">Tipo</label>
+        <select id="type" formControlName="type">
+          @for (type of types; track type) {
+            <option [value]="type">{{ labels[type] }}</option>
+          }
+        </select>
+      </div>
+
+      @if (needsValue()) {
+        <div class="field">
+          <label for="value">Chave</label>
+          <input id="value" type="text" formControlName="value" [placeholder]="placeholder()" />
+        </div>
+      } @else {
+        <p class="muted note">
+          O banco gera uma chave aleatória para você. Serve para receber sem revelar seu CPF,
+          telefone ou e-mail.
+        </p>
+      }
+
+      <button class="btn full" type="submit" [disabled]="saving()">
+        {{ saving() ? 'Cadastrando…' : 'Cadastrar chave' }}
+      </button>
+    </form>
+
+    <p class="muted note limits">
+      Uma chave de e-mail precisa ser o e-mail da própria conta — é a única posse que este app
+      consegue verificar. CPF e celular ficam como declarados: confirmar qualquer um dos dois
+      exigiria consultar documento ou mandar SMS.
+    </p>
+  </section>
+</div>

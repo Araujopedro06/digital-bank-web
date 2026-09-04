@@ -42,7 +42,9 @@
         </button>
       </form>
 
-      <p class="muted footer">Não tem conta? <a routerLink="/register">Abrir conta</a></p>
+      <p class="muted footer">
+        Não tem conta? <a routerLink="/register" [queryParams]="carryOver">Abrir conta</a>
+      </p>
     }
   </div>
 </div>

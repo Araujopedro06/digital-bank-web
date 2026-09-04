@@ -1,0 +1,83 @@
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="muted">Carregando…</p>
+} @else if (keys().length === 0) {
+  <div class="card form-card">
+    <p class="muted">
+      Para receber por Pix você precisa de pelo menos uma chave. Cadastre uma em
+      <strong>Minhas chaves</strong>.
+    </p>
+  </div>
+} @else {
+  <div class="columns">
+    <section class="card form-card">
+      <h2>Gerar código</h2>
+
+      <form [formGroup]="form" (ngSubmit)="generate()">
+        <div class="field">
+          <label for="keyId">Chave que vai receber</label>
+          <select id="keyId" formControlName="keyId">
+            @for (key of keys(); track key.id) {
+              <option [value]="key.id">{{ labels[key.type] }} · {{ key.display }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="amount">Valor (opcional)</label>
+          <input id="amount" type="number" step="0.01" min="0.01" formControlName="amount" />
+          <p class="muted hint">Sem valor, quem for pagar escolhe quanto enviar.</p>
+        </div>
+
+        <div class="field">
+          <label for="description">Descrição (opcional)</label>
+          <input id="description" type="text" maxlength="120" formControlName="description" />
+        </div>
+
+        <button class="btn full" type="submit" [disabled]="form.invalid || busy()">
+          {{ busy() ? 'Gerando…' : 'Gerar código' }}
+        </button>
+      </form>
+    </section>
+
+    @if (charge(); as generated) {
+      <section class="card result">
+        <div class="qr">
+          <canvas #qr></canvas>
+        </div>
+
+        <p class="muted caption">
+          Aponte a câmera. O link abre o Digital Bank já com o pagamento pronto para
+          {{ labels[generated.key.type] }} · {{ generated.key.display }}.
+        </p>
+
+        <p class="link">{{ link() }}</p>
+
+        <button type="button" class="btn full" (click)="copyLink()">
+          {{ copied() === 'link' ? 'Link copiado' : 'Copiar link' }}
+        </button>
+
+        <p class="muted expiry">Vale até {{ generated.expiresAt | date: 'dd/MM/yyyy HH:mm' }}.</p>
+
+        <details class="standard">
+          <summary>Código Pix padrão (copia e cola)</summary>
+
+          <p class="muted note">
+            Este é o payload EMV do Pix, com a chave dentro. Um app de banco real lê o formato,
+            mas não consegue pagar: a chave não está no DICT do Banco Central. Serve para colar
+            na aba <strong>Pagar</strong> aqui.
+          </p>
+
+          <textarea rows="4" readonly>{{ generated.brCode }}</textarea>
+
+          <button type="button" class="btn btn-ghost full" (click)="copyBrCode()">
+            {{ copied() === 'brcode' ? 'Código copiado' : 'Copiar código' }}
+          </button>
+        </details>
+      </section>
+    }
+  </div>
+}

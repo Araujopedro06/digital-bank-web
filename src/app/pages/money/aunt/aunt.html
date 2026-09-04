@@ -1,0 +1,66 @@
+<div class="card form-card">
+  <div class="who">
+    <span class="avatar" aria-hidden="true">👵</span>
+    <div>
+      <p class="name">Tia Odete</p>
+      <p class="muted role">Sua tia rica</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (reply(); as answer) {
+    <blockquote class="reply" [class.refused]="answer.result.outcome === 'REFUSED'">
+      <p class="line">“{{ answer.line }}”</p>
+
+      @switch (answer.result.outcome) {
+        @case ('GRANTED') {
+          <p class="muted detail">
+            Caíram {{ answer.result.granted | currency: 'BRL' : 'symbol' : '1.2-2' }} na sua
+            conta.
+          </p>
+        }
+        @case ('HAGGLED') {
+          <p class="muted detail">
+            Você pediu {{ answer.result.asked | currency: 'BRL' : 'symbol' : '1.2-2' }} e ela
+            mandou {{ answer.result.granted | currency: 'BRL' : 'symbol' : '1.2-2' }}.
+          </p>
+        }
+        @case ('REFUSED') {
+          <p class="muted detail">
+            Você pediu {{ answer.result.asked | currency: 'BRL' : 'symbol' : '1.2-2' }} e não veio
+            nada. Tenta um valor mais camarada.
+          </p>
+        }
+      }
+    </blockquote>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="ask()">
+    <div class="field">
+      <label for="amount">Quanto você vai pedir? (R$)</label>
+      <input id="amount" type="number" step="0.01" min="0.01" formControlName="amount" />
+    </div>
+
+    <button class="btn full" type="submit" [disabled]="form.invalid || asking()">
+      {{ asking() ? 'Ligando pra tia…' : 'Pedir dinheiro' }}
+    </button>
+  </form>
+
+  @if (status(); as limits) {
+    <p class="muted note">
+      Ela manda até {{ limits.generousLimit | currency: 'BRL' : 'symbol' : '1.0-0' }} sem reclamar.
+      Acima disso ela corta o valor, e passando de
+      {{ limits.haggleLimit | currency: 'BRL' : 'symbol' : '1.0-0' }} ela manda você trabalhar.
+    </p>
+
+    @if (limits.availableAt) {
+      <p class="muted note">
+        Depois de dar dinheiro ela some por um tempo — volta a atender às
+        {{ limits.availableAt | date: 'HH:mm' }}.
+      </p>
+    }
+  }
+</div>

@@ -1,0 +1,23 @@
+.subtitle {
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0;
+  max-width: 52ch;
+}
+
+.tabs {
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 1.5rem;
+  margin: 1.25rem 0 1.5rem;
+
+  a {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    padding-bottom: 0.6rem;
+
+    &.active {
+      border-bottom: 2px solid var(--accent);
+      color: var(--text);
+    }
+  }
+}

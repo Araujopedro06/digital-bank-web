@@ -1,0 +1,104 @@
+.columns {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 860px) {
+    align-items: start;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.form-card {
+  max-width: 460px;
+}
+
+.full {
+  width: 100%;
+}
+
+.space {
+  margin-top: 0.6rem;
+}
+
+.figures {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+.label {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.2rem;
+  text-transform: uppercase;
+}
+
+.amount {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0;
+
+  &.small {
+    font-size: 1.2rem;
+  }
+}
+
+.rows {
+  margin: 0 0 1rem;
+
+  div {
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+
+    &:first-child {
+      border-top: none;
+    }
+  }
+
+  dt,
+  dd {
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  dd {
+    text-align: right;
+  }
+
+  .highlight {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .cost {
+    color: var(--danger);
+  }
+}
+
+.hint,
+.note {
+  font-size: 0.8rem;
+  margin: 0.35rem 0 0;
+}
+
+.note {
+  margin-top: 1rem;
+}
+
+.success {
+  background: var(--accent-soft);
+  border-radius: 10px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+}

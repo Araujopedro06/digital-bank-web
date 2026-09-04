@@ -1,0 +1,109 @@
+.columns {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 860px) {
+    align-items: start;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.form-card {
+  max-width: 460px;
+}
+
+.full {
+  width: 100%;
+}
+
+.hint {
+  font-size: 0.8rem;
+  margin: 0.35rem 0 0;
+}
+
+.result {
+  text-align: center;
+}
+
+/* A scanner needs dark modules on a light ground, so the code keeps its own
+   white card even though everything around it is dark. */
+.qr {
+  background: #ffffff;
+  border-radius: 12px;
+  display: inline-block;
+  line-height: 0;
+  padding: 0.75rem;
+}
+
+canvas {
+  display: block;
+}
+
+.caption {
+  font-size: 0.85rem;
+  margin: 0.85rem 0 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+/* Selectable, so the link survives a browser that refuses clipboard access. */
+.link {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-family: ui-monospace, 'SFMono-Regular', 'Consolas', monospace;
+  font-size: 0.75rem;
+  margin: 0 0 0.75rem;
+  overflow-wrap: anywhere;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  user-select: all;
+}
+
+.expiry {
+  font-size: 0.78rem;
+  margin: 0.6rem 0 0;
+}
+
+.standard {
+  border-top: 1px solid var(--border);
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  text-align: left;
+
+  summary {
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+}
+
+.note {
+  font-size: 0.8rem;
+  margin: 0.75rem 0;
+}
+
+textarea {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-family: ui-monospace, 'SFMono-Regular', 'Consolas', monospace;
+  font-size: 0.75rem;
+  margin-bottom: 0.75rem;
+  overflow-wrap: anywhere;
+  padding: 0.7rem 0.85rem;
+  resize: vertical;
+  width: 100%;
+
+  &:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+}

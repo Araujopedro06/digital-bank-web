@@ -1,9 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { messageFor } from '../../core/api-error';
 import { AuthService } from '../../core/auth.service';
+import { safeRedirect } from '../../core/redirect';
 
 @Component({
   selector: 'app-register',
@@ -14,6 +15,12 @@ import { AuthService } from '../../core/auth.service';
 export class Register {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+
+  /** Someone who opened a payment link with no account still ends up paying it. */
+  private readonly requested = inject(ActivatedRoute).snapshot.queryParamMap.get('redirect');
+  private readonly redirect = safeRedirect(this.requested);
+
+  protected readonly carryOver = this.requested ? { redirect: this.redirect } : {};
 
   protected readonly submitting = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -34,7 +41,7 @@ export class Register {
 
     const { name, email, password } = this.form.getRawValue();
     this.auth.register(name, email, password).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigateByUrl(this.redirect),
       error: (response: HttpErrorResponse) => {
         this.error.set(messageFor(response, 'Não foi possível abrir a conta.'));
         this.submitting.set(false);

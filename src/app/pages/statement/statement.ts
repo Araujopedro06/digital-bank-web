@@ -2,12 +2,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { BankService } from '../../core/bank.service';
 import { Transaction, TransactionType } from '../../core/models';
-
-const LABELS: Record<TransactionType, string> = {
-  DEPOSIT: 'Depósito',
-  TRANSFER_IN: 'Transferência recebida',
-  TRANSFER_OUT: 'Transferência enviada',
-};
+import { TRANSACTION_LABELS, isCredit } from '../../core/transactions';
 
 @Component({
   selector: 'app-statement',
@@ -44,10 +39,8 @@ export class Statement implements OnInit {
   }
 
   label(type: TransactionType) {
-    return LABELS[type];
+    return TRANSACTION_LABELS[type];
   }
 
-  isCredit(transaction: Transaction) {
-    return transaction.type !== 'TRANSFER_OUT';
-  }
+  protected readonly isCredit = isCredit;
 }

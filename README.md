@@ -1,7 +1,7 @@
 # Digital Bank — Web
 
-Angular 20 client for the Digital Bank API: sign-in, balance, transfers and
-statement. One responsive codebase — a sidebar-style top bar on desktop that
+Angular 20 client for the Digital Bank API: sign-in, balance, Pix, transfers,
+loans and statement. One responsive codebase — a sidebar-style top bar on desktop that
 becomes a bottom tab bar on phones, the way a real banking app behaves.
 
 **Live: <https://tiny-druid-25e148.netlify.app>** — sign in with
@@ -27,12 +27,75 @@ the free tier, so the first request after a quiet spell can take ~50 seconds.
 
 ```
 src/app
-├── core       auth, HTTP interceptor, guards, API clients, face + profile services
-├── pages      login, register, dashboard, transfer, statement, profile (lazy-loaded)
+├── core       auth, HTTP interceptor, guards, API clients, face + pix + loan services
+├── pages      login, register, dashboard, pix, money, transfer, statement, profile (lazy)
 ├── shared     face-capture: webcam, liveness challenge, descriptor extraction
 ├── app.ts     shell: navigation, avatar, responsive chrome
 └── app.routes route table with auth/guest guards
 ```
+
+## Conseguir dinheiro
+
+A new account has a zero balance, which makes every other screen a dead end — the
+Pix form works and there is nothing to send. `/money` is where that gets fixed,
+and the dashboard says so on its own: while the balance is zero it shows a card
+pointing straight at it, and the card disappears once there is money.
+
+Two tabs:
+
+- **Tia rica** — ask for an amount. She pays it, trims it, or tells you to get a
+  job. The API answers with an outcome and no words at all, so the lines live in
+  `aunt.ts` and one is drawn at random each time; a button that replies with the
+  same sentence twice stops being funny on the second press.
+- **Empréstimo** — a simulation that re-quotes as the form is dragged around
+  (debounced, so it is one request per pause and not per keystroke), then a loan
+  with instalments, a running balance, and a settle-early button that shows what
+  settling saves.
+
+## Pix
+
+Three tabs under `/pix`, which is what anyone opens a Pix screen to do:
+
+- **Pagar** — one box takes either a key or a pasted "copia e cola" code. From
+  the payer's side those are the same thing, an address, and the code's first six
+  characters already answer which one was pasted, so the screen does not ask.
+  What comes back is the recipient's **name** on a confirmation card before any
+  amount is entered; a code that carried an amount fills it in and locks it.
+- **Receber** — pick a key, optionally an amount, and get a QR anyone can scan
+  with a plain phone camera. See below for what it points at.
+- **Minhas chaves** — register, copy and give up keys.
+
+An enrolled face is required to send, exactly as it is for a transfer.
+
+The QR is drawn with [`qrcode`](https://github.com/soldair/node-qrcode), imported
+on demand the same way face-api is, so the initial bundle does not carry it. It
+renders dark-on-white on its own card regardless of the app's dark theme, because
+that is the contrast direction a scanner needs.
+
+### What the QR points at
+
+Not the Pix payload — a link into this app:
+
+```
+scan  →  /pix/pay/<charge id>
+      →  authGuard bounces to /login?redirect=…
+      →  sign in (or open an account; the destination survives that detour)
+      →  the payment screen, already showing who is being paid
+```
+
+Encoding the BR Code instead would be the standards-correct choice and would do
+nothing: no real banking app can pay a key this bank invented. The link is the
+version that works from any phone camera. The copia e cola payload is still there
+under *Código Pix padrão*, for pasting into the *Pagar* tab.
+
+The link carries a charge id and never the key itself — a payment link gets
+forwarded and screenshotted, and a URL with someone's CPF in it spreads with it.
+The API README explains that side.
+
+`core/redirect.ts` is what makes the round trip safe: the `redirect` parameter is
+attacker-controlled, so only a path on this origin is honoured. Sending a
+freshly signed-in user to whatever a link says is an open redirect, and a bank is
+exactly the kind of site people get phished into.
 
 ## Profile photo and facial verification
 
@@ -129,8 +192,8 @@ in — see **Deploying** below — so the same artifact runs against any backend
 - **Error copy is decided client-side** from the HTTP status. The API keeps its
   messages generic and in English on purpose; `core/api-error.ts` maps them to
   Portuguese.
-- **Feature routes are lazy-loaded,** keeping the initial bundle around 88 kB
-  transferred.
+- **Feature routes are lazy-loaded,** keeping the initial bundle around 93 kB
+  transferred; face-api and the QR encoder are imported on demand on top of that.
 
 ## Deploying
 

@@ -1,0 +1,88 @@
+.balance {
+  margin: 0 0 1.25rem;
+}
+
+.form-card {
+  max-width: 460px;
+}
+
+.full {
+  width: 100%;
+}
+
+.back {
+  margin-top: 0.6rem;
+}
+
+textarea {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.7rem 0.85rem;
+  resize: vertical;
+  width: 100%;
+
+  &:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+}
+
+/* The whole point of the confirmation step is that this name is unmissable. */
+.recipient {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+}
+
+.label {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+}
+
+.name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.detail {
+  font-size: 0.85rem;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  font-size: 0.8rem;
+  margin: 0.35rem 0 0;
+}
+
+.confirm-title {
+  font-size: 1.05rem;
+}
+
+.confirm-sub {
+  margin: 0.35rem 0 1.25rem;
+}
+
+.face-note {
+  font-size: 0.82rem;
+  margin: 0.9rem 0 0;
+  text-align: center;
+}
+
+.success {
+  background: var(--accent-soft);
+  border-radius: 10px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+}

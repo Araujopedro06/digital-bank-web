@@ -1,9 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { messageFor } from '../../core/api-error';
 import { AuthService } from '../../core/auth.service';
+import { safeRedirect } from '../../core/redirect';
 import { FaceCapture } from '../../shared/face-capture/face-capture';
 
 @Component({
@@ -15,6 +16,13 @@ import { FaceCapture } from '../../shared/face-capture/face-capture';
 export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+
+  /** Where the guard wanted to send them before login got in the way. */
+  private readonly requested = inject(ActivatedRoute).snapshot.queryParamMap.get('redirect');
+  private readonly redirect = safeRedirect(this.requested);
+
+  /** Keeps the destination through a detour to "Abrir conta". */
+  protected readonly carryOver = this.requested ? { redirect: this.redirect } : {};
 
   protected readonly submitting = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -44,7 +52,7 @@ export class Login {
           this.challengeToken.set(response.challengeToken);
           this.greeting.set(response.name);
         } else {
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl(this.redirect);
         }
       },
       error: (response: HttpErrorResponse) => {
@@ -64,7 +72,7 @@ export class Login {
     this.error.set(null);
 
     this.auth.completeFaceLogin(token, descriptor).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigateByUrl(this.redirect),
       error: (response: HttpErrorResponse) => {
         this.submitting.set(false);
         // The challenge is single-use, so a failure sends them back to the password.

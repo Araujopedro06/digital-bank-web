@@ -5,6 +5,7 @@ import { forkJoin } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
 import { BankService } from '../../core/bank.service';
 import { Account, Transaction } from '../../core/models';
+import { isCredit } from '../../core/transactions';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,7 +40,5 @@ export class Dashboard implements OnInit {
     this.balanceHidden.update((hidden) => !hidden);
   }
 
-  isCredit(transaction: Transaction) {
-    return transaction.type !== 'TRANSFER_OUT';
-  }
+  protected readonly isCredit = isCredit;
 }

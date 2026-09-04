@@ -16,10 +16,25 @@
     <p class="muted account-number">Conta {{ acc.number }}</p>
 
     <div class="actions">
-      <a class="btn" routerLink="/transfer">Transferir</a>
+      <a class="btn" routerLink="/pix">Pix</a>
+      <a class="btn btn-ghost" routerLink="/transfer">Transferir</a>
+      <a class="btn btn-ghost" routerLink="/money">Conseguir dinheiro</a>
       <a class="btn btn-ghost" routerLink="/statement">Ver extrato</a>
     </div>
   </section>
+
+  <!-- A brand new account has nothing to send, and a Pix screen with no money
+       behind it is a dead end. This is the first thing such a visitor sees. -->
+  @if (acc.balance === 0) {
+    <section class="empty-wallet">
+      <p class="headline">Sua conta está zerada.</p>
+      <p class="muted">
+        Este é um banco de demonstração. Peça um dinheiro pra tia rica ou pegue um empréstimo
+        aprovado na hora, e aí dá para testar um Pix.
+      </p>
+      <a class="btn" routerLink="/money">Conseguir dinheiro</a>
+    </section>
+  }
 
   <section class="recent">
     <div class="row">
